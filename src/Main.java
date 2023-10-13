@@ -1,65 +1,102 @@
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Main {
     public static class Calculation {
         private static Scanner input = new Scanner(System.in);
-        private static double number1, number2, result;
-        private static String operation;
-        boolean stop;
-
-        Calculation() {
-            this.number1 = 0;
-            this.number2 = 0;
-            this.operation = "";
-            this.stop = false;
-        }
+        private static double result;
+        private static double[] numbers = new double[10] ;
+        private static char[] operations = new char[9];
+        private static String phrase, answer;
+        boolean stop = false;
 
         public void Run() {
-            switch (this.operation) {
-                case "+":
-                    this.result = this.number1 + this.number2;
-                    break;
-                case "-":
-                    this.result = this.number1 - this.number2;
-                    break;
-                case "*":
-                    this.result = this.number1 * this.number2;
-                    break;
-                case "/":
-                    this.result = this.number1 / this.number2;
-                    break;
-                case "s":
-                    this.stop = true;
-                    break;
-                default:
-                    System.out.println("Program can't read this operation...\n" +
-                            "Try again or enter 's' to stop the program");
-                    get_operation();
-                    break;
+            int n = 0, index = 0;
+            String buff = "";
+            for (int i = 0; i < phrase.length(); i++) {
+                if (Character.isDigit(phrase.toCharArray()[i]) || phrase.toCharArray()[i] == ','
+                        || phrase.toCharArray()[i] == '.')
+                    buff += phrase.toCharArray()[i];
+                else {
+                    operations[n] = phrase.toCharArray()[i];
+                    numbers[n] = Double.parseDouble(buff.replace(",", "."));
+                    buff = "";
+                    n++;
+                }
             }
+            numbers[n] = Double.parseDouble(buff.replace(",", "."));
+
+            for (int i = 0; i < n; i++) {
+                if (operations[index] == '*') {
+                    numbers[i] *= numbers[i + 1];
+                    for (int j = i + 1; j <= n; j++) {
+                        numbers[j] = numbers[j + 1];
+                        operations[j - 1] = operations[j];
+                    }
+                }
+                index++;
+            }
+            index = 0;
+
+            for (int i = 0; i < n; i++) {
+                if (operations[index] == '/') {
+                    numbers[i] /= numbers[i + 1];
+                    for (int j = i + 1; j <= n; j++) {
+                        numbers[j] = numbers[j + 1];
+                        operations[j - 1] = operations[j];
+                    }
+                }
+                index++;
+            }
+            index = 0;
+
+            for (int i = 0; i < n; i++) {
+                if (operations[index] == '+') {
+                    numbers[i] += numbers[i + 1];
+                    for (int j = i + 1; j <= n; j++) {
+                        numbers[j] = numbers[j + 1];
+                        operations[j - 1] = operations[j];
+                    }
+                }
+                index++;
+            }
+            index = 0;
+
+            for(int i = 0; i < n; i++) {
+                if (operations[index] == '-') {
+                    numbers[i] -= numbers[i + 1];
+                    for (int j = i + 1; j <= n; j++) {
+                        numbers[j] = numbers[j + 1];
+                        operations[j - 1] = operations[j];
+                    }
+                }
+                index++;
+            }
+
+            System.out.println("result = " + (result = numbers[0]));
+
+            System.out.println("Do you want to continue? y/n");
+            answer = input.next();
+            if(answer.equals("y"))
+                stop = false;
+            else
+                stop = true;
         }
 
         public void get_input() {
-            System.out.printf("num1 = ");
-            this.number1 = input.nextDouble();
-            System.out.printf("num2 = ");
-            this.number2 = input.nextDouble();
+            System.out.println("Input your math phrase. (without space)");
+            phrase = input.next();
         }
 
-        public void get_input(double last_result) {
-            System.out.println("\nlast result = " + (this.number1 = last_result));
-            System.out.printf("num2 = ");
-            this.number2 = input.nextDouble();
-        }
-
-        public void get_operation() {
-            System.out.printf("operation: ");
-            this.operation = input.next();
-            Run();
+        public void get_input(String last_result)
+        {
+            System.out.println("\nContinue your math phrase.");
+            System.out.printf(last_result);
+            phrase = last_result + input.next();
         }
 
         public double return_result() {
-            return this.result;
+            return result;
         }
     }
 
@@ -68,17 +105,14 @@ public class Main {
         boolean next = false;
         double result = 0;
 
-        while (true) {
-            if (!next)
-                calc.get_input();
+        while (!calc.stop) {
+            if (next)
+                calc.get_input(Double.toString(result));
             else
-                calc.get_input(result);
+                calc.get_input();
+            calc.Run();
 
-            calc.get_operation();
-            if(calc.stop)
-                break;
-
-            System.out.println("result = " + (result = calc.return_result()));
+            result = calc.return_result();
             next = true;
         }
     }
